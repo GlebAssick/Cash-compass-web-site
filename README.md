@@ -116,3 +116,8 @@ Note there are two similarly named directories: `AuthContext.tsx` lives in
 `context/` (singular) while the other three live in `contexts/` (plural). Both
 paths are referenced by the parity spec, so they are left as they are rather
 than consolidated.
+
+
+## Related
+- Web app: https://github.com/glebassick/cash-compass-web-site  (live: https://cash-compass-gleb.vercel.app)
+- Backend: https://github.com/glebassick/Cash-Compass-Backend (live: https://cash-compass-backend-production.up.railway.app/docs)
