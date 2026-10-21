@@ -1,0 +1,170 @@
+/* Manrope only.
+ *
+ * The previous build loaded eight families to serve five selectable themes.
+ * There is one design now, so there is one family — and this is not only a
+ * simplification: the font it replaces (Outfit) carries no Cyrillic glyphs at
+ * all, which meant the Russian build rendered in whatever substitute the
+ * browser picked. Manrope covers Latin and Cyrillic. */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+/* #propertyofindia */
+@tailwind components;
+/* #akshitsaini */
+@tailwind utilities;
+
+@layer base {
+  /* The single palette. Mirrors mobile/lib/app/theme/app_colors.dart value for
+   * value — the two platforms share one design language, so these are
+   * transcribed rather than reinterpreted. Hex is given beside each so a change
+   * on either side is a one-line diff to reconcile.
+   *
+   * There is no [data-theme] block and no dark variant. A theme selector was
+   * removed from both platforms; adding a second block here is what would
+   * quietly bring it back. */
+  :root {
+    /* --- the two poles ------------------------------------------------- */
+    --background: 0 0% 100%;              /* #FFFFFF  AppColors.surface */
+    --foreground: 0 0% 0%;                /* #000000  AppColors.ink */
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+
+    /* --- controls ------------------------------------------------------ */
+    /* Primary is solid ink with white type: the black pill button. */
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary/muted/accent all collapse onto the one grey fill. With five
+     * hues these were three distinct surfaces; monochrome has exactly one
+     * recessed step, and pretending otherwise invents contrast that is not
+     * there. */
+    --secondary: 0 0% 96%;                /* #F5F5F5  AppColors.subtleFill */
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 29%;         /* #4A4A4A  AppColors.inkSecondary */
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 0%;
+
+    /* --- edges --------------------------------------------------------- */
+    /* Two tokens, doing two different jobs. This split is the whole reason a
+     * card full of rows reads as a table rather than as six competing lines:
+     *
+     *   --outline  the edge of a container: cards, inputs, tiles, chips.
+     *   --border   a rule *inside* one: separators, table gridlines, dividers.
+     *
+     * shadcn reaches for `border` in both places, so `--border` is the pale one
+     * and containers opt into the black edge explicitly (see .surface-outline
+     * and the Card/Button primitives in src/design-system/). Getting these the
+     * same value is the single easiest way to make this design look wrong. */
+    --outline: 0 0% 0%;                   /* #000000  AppColors.outline */
+    --border: 0 0% 88%;                   /* #E0E0E0  AppColors.hairline */
+    --input: 0 0% 0%;                     /* an input is a container: ink */
+    --ring: 0 0% 0%;
+
+    /* --- remaining greys ----------------------------------------------- */
+    --disabled: 0 0% 62%;                 /* #9E9E9E  AppColors.disabled */
+    --on-ink-dim: 0 0% 54%;               /* #8A8A8A  muted type on an ink panel */
+    --backdrop-line: 0 0% 85%;            /* #D8D8D8  decorative background curves */
+
+    /* --- the one reserved colour --------------------------------------- */
+    /* The design brief says communicate by icon and weight, not hue. This is
+     * the agreed exception: a destructive confirmation is the one place where
+     * relying on weight alone risks someone wiping their data by miscounting
+     * which button is which. Used nowhere else. */
+    --destructive: 0 66% 47%;             /* #C62828  AppColors.error */
+    --destructive-foreground: 0 0% 100%;
+
+    /* --- geometry ------------------------------------------------------ */
+    /* Mirrors AppRadius. --radius drives shadcn's rounded-lg/md/sm chain, so it
+     * is set to the surface radius and controls take their own token. */
+    --radius: 1.25rem;                    /* 20px  AppRadius.surface */
+    --radius-control: 0.875rem;           /* 14px  AppRadius.control */
+    --radius-small: 0.625rem;             /* 10px  AppRadius.small */
+
+    /* One family, three aliases. 41 call sites still say font-heading /
+     * font-body / font-mono; pointing all three here retires the distinction
+     * without a rename sweep, and a stray one can no longer render off-design.
+     * Numerals get tabular figures from .tabular-nums rather than from a
+     * second family. */
+    --font-heading: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+
+    /* Flat by decision. The brief offers a hairline border *or* a subtle
+     * shadow; this design takes the border everywhere. Mixing the two is what
+     * makes a page look assembled from two different kits, and a hairline stays
+     * crisp at every pixel ratio where a 1px shadow goes muddy.
+     *
+     * Kept as a variable rather than deleted because 27 call sites reference
+     * .shadow-card; they now resolve to the border treatment instead of a
+     * shadow, which is the intended look and needs no edit at each site. */
+    --shadow-card: none;
+    --shadow-hover: none;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    /* Desktop-only, 1280px+. See .viewport-guard below. */
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    font-feature-settings: 'ss01', 'cv01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Money and any figure read in a column. Manrope's proportional digits make
+   * a column of amounts ragged; tabular figures line the decimal points up
+   * without needing a second typeface. */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+}
+
+@layer components {
+  /* The container edge. Applied by the Card primitive and anything else that
+   * is a bounded surface rather than a rule inside one. */
+  .surface-outline {
+    border: 1px solid hsl(var(--outline));
+  }
+
+  /* Kept as no-ops so the 27 existing .shadow-card call sites keep compiling
+   * and simply render flat. New code should not reach for these. */
+  .shadow-card,
+  .shadow-card-hover {
+    box-shadow: none;
+  }
+}
+
+/* #meehikasharma */
+@layer utilities {
+  /* Below the supported width the app does not reflow — it says so. A
+   * desktop-specialised port that silently renders a broken 900px layout is
+   * worse than one that declines: the user cannot tell whether they are
+   * looking at a bug or a design. */
+  .viewport-guard {
+    display: none;
+  }
+
+  @media (max-width: 1279px) {
+    .viewport-guard {
+      display: flex;
+    }
+
+    .viewport-gated {
+      display: none;
+    }
+  }
+}
